@@ -14,6 +14,14 @@ public class AudioPeer : MonoBehaviour {
 	private float[] bufferDecrease;
 	private float[] freqBandHighest;
 
+	public static float[] audioBand;
+	public static float[] audioBandBuffer;
+
+	public static float amplitude, amplitudeBuffer;
+	private float amplitudeHighest;
+
+	public float audioProfile;
+
 	public float startBufferDecrease = 0.005f;
 	public float bufferDecreaseMultiplier = 1.2f;
 
@@ -28,7 +36,12 @@ public class AudioPeer : MonoBehaviour {
 		bufferDecrease = new float[numBands];
 		freqBandHighest = new float[numBands];
 
+		audioBand = new float[numBands];
+		audioBandBuffer = new float[numBands];
+
 		source = GetComponent<AudioSource> ();
+
+		AudioProfile (audioProfile);
 	}
 	
 	// Update is called once per frame
@@ -36,6 +49,8 @@ public class AudioPeer : MonoBehaviour {
 		GetSpectrumAudioSource ();
 		MakeFrequencyBands ();
 		BandBuffer ();
+		CreateAudioBands ();
+		GetAmplitude ();
 	}
 
 	void GetSpectrumAudioSource(){
@@ -69,6 +84,41 @@ public class AudioPeer : MonoBehaviour {
 				bandBuffer [i] -= bufferDecrease [i];
 				bufferDecrease [i] *= bufferDecreaseMultiplier;
 			}
+		}
+	}
+
+	void CreateAudioBands(){
+		for (int i = 0; i < numBands; i++) {
+			if (freqBand [i] > freqBandHighest [i]) {
+				freqBandHighest [i] = freqBand [i];
+			}
+
+			audioBand [i] = freqBand [i] / freqBandHighest [i];
+			audioBandBuffer [i] = bandBuffer [i] / freqBandHighest [i];
+		}
+	}
+
+	void GetAmplitude(){
+		float currentAmplitude = 0;
+		float currentAmplitudeBuffer = 0;
+
+		for (int i = 0; i < numBands; i++) {
+			currentAmplitude += audioBand [i];
+			currentAmplitudeBuffer += audioBandBuffer [i];
+		}
+
+		if (currentAmplitude > amplitudeHighest) {
+			amplitudeHighest = currentAmplitude;
+		}
+
+		amplitude = currentAmplitude / amplitudeHighest;
+		amplitudeBuffer = currentAmplitudeBuffer / amplitudeHighest;
+	}
+
+	void AudioProfile(float audioProfile){
+		amplitudeHighest = audioProfile;
+		for (int i = 0; i < numBands; i++) {
+			freqBandHighest [i] = audioProfile;
 		}
 	}
 }

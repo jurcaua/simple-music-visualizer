@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FreqBandCubes : MonoBehaviour {
 
-	public static GameObject[] cubes;
+	public GameObject[] cubes;
 
 	public float cubeSize = 10f;
 	public float startScale = 2f;
